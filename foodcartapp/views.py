@@ -1,8 +1,12 @@
+import json
+
 from django.http import JsonResponse
 from django.templatetags.static import static
 
 
 from .models import Product
+from .models import Order
+from .models import OrderElement
 
 
 def banners_list_api(request):
@@ -56,7 +60,48 @@ def product_list_api(request):
         'indent': 4,
     })
 
+import phonenumbers
 
 def register_order(request):
     # TODO это лишь заглушка
+    order_details = json.loads(request.body.decode())
+
+    # {'products': [{'product': 3, 'quantity': 1}], 'firstname': '1', 'lastname': '2', 'phonenumber': '3', 'address': '4'}
+
+    print("Test ", phonenumbers.parse(order_details.get('phonenumber'), None))
+    print(phonenumbers.is_possible_number(phonenumbers.parse(order_details.get('phonenumber'), None)))
+
+    if not phonenumbers.is_possible_number(phonenumbers.parse(order_details.get('phonenumber'), None)):
+        raise TypeError
+
+    order = Order.objects.create(
+        name=order_details.get('firstname'),
+        surname=order_details.get('lastname'),
+        # phone=order_details.get('phonenumber'),
+        phone=phonenumbers.parse(order_details.get('phonenumber'), None),
+        address=order_details.get('address'),
+    )
+    print(order)
+    # elements = []
+    for item in order_details.get('products'):
+        element = OrderElement.objects.get_or_create(
+            element=Product.objects.get(pk=item.get('product')),
+            quantity=item.get('quantity'),
+            order=order,
+        )[0]
+        element.save()
+        # print(element)
+        # elements.append(
+        #     element[0]
+        # )
+    # print(elements)
+
+    order.save()
+
+    # for elem in elements:
+    #     order.products.add(elem)
+
+
+    print(json.loads(request.body.decode()))
+
     return JsonResponse({})
