@@ -3,8 +3,11 @@ import phonenumbers
 
 from django.http import JsonResponse
 from django.templatetags.static import static
+from django.core.exceptions import ObjectDoesNotExist
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
+from rest_framework.status import HTTP_400_BAD_REQUEST
+
 
 from .models import Product
 from .models import Order
@@ -75,22 +78,40 @@ def register_order(request):
         # if not order_details.get('products')
 
         if not order_details.get('products'):
-            return Response({'message': 'Must have list of products',})
+            return Response({'message': 'Must have list of products',}, status=HTTP_400_BAD_REQUEST)
 
         if not len(order_details.get('products')):
-            return Response({'message': 'List of products cannot be empty'})
+            return Response({'message': 'List of products cannot be empty'}, status=HTTP_400_BAD_REQUEST)
 
         if not isinstance(order_details.get('products'), list):
-            return Response({'message': 'Must have list of products',})
+            return Response({'message': 'Must have list of products',}, status=HTTP_400_BAD_REQUEST)
 
+
+        if not order_details.get('firstname'):
+            return Response({'message': 'First name cannot be empty',}, status=HTTP_400_BAD_REQUEST)
+        if not isinstance(order_details.get('firstname'), str):
+            return Response({'message': 'First name must be string',}, status=HTTP_400_BAD_REQUEST)
+
+        if not order_details.get('lastname'):
+            return Response({'message': 'Last name cannot be empty',}, status=HTTP_400_BAD_REQUEST)
+        if not isinstance(order_details.get('lastname'), str):
+            return Response({'message': 'Last name must be string',}, status=HTTP_400_BAD_REQUEST)
+
+        if not order_details.get('phonenumber'):
+            return Response({'message': 'Phone number cannot be empty',}, status=HTTP_400_BAD_REQUEST)
+
+        if not order_details.get('address'):
+            return Response({'message': 'Address cannot be empty',}, status=HTTP_400_BAD_REQUEST)
+        if not isinstance(order_details.get('address'), str):
+            return Response({'message': 'Address must be string',}, status=HTTP_400_BAD_REQUEST)
 
         # {"products": [{"product": 3, "quantity": 1}], "firstname": "1", "lastname": "2", "phonenumber": "+79624123456", "address": "4"}
 
-        print("Test ", phonenumbers.parse(order_details.get('phonenumber'), None))
-        print(phonenumbers.is_possible_number(phonenumbers.parse(order_details.get('phonenumber'), None)))
+        # print("Test ", phonenumbers.parse(order_details.get('phonenumber'), None))
+        # print(phonenumbers.is_valid_number(phonenumbers.parse(order_details.get('phonenumber'), None)))
 
-        if not phonenumbers.is_possible_number(phonenumbers.parse(order_details.get('phonenumber'), None)):
-            raise TypeError
+        if not phonenumbers.is_valid_number(phonenumbers.parse(order_details.get('phonenumber'), None)):
+            return Response({'message': 'Incorrect phone number',}, status=HTTP_400_BAD_REQUEST)
 
         order = Order.objects.create(
             name=order_details.get('firstname'),
@@ -122,6 +143,8 @@ def register_order(request):
         print("Attribute error")
     except TypeError:
         print("Type error")
+    except ObjectDoesNotExist:
+        return Response({'message': 'Product does not exist',}, status=HTTP_400_BAD_REQUEST)
 
 
     return JsonResponse({})
