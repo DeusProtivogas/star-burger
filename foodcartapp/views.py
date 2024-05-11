@@ -1,8 +1,9 @@
 import json
+import phonenumbers
 
 from django.http import JsonResponse
 from django.templatetags.static import static
-
+from rest_framework.decorators import api_view
 
 from .models import Product
 from .models import Order
@@ -60,13 +61,15 @@ def product_list_api(request):
         'indent': 4,
     })
 
-import phonenumbers
 
+@api_view(['POST'])
 def register_order(request):
     # TODO это лишь заглушка
-    order_details = json.loads(request.body.decode())
+    order_details = request.data
 
-    # {'products': [{'product': 3, 'quantity': 1}], 'firstname': '1', 'lastname': '2', 'phonenumber': '3', 'address': '4'}
+    print("ORDER ", order_details)
+
+    # {"products": [{"product": 3, "quantity": 1}], "firstname": "1", "lastname": "2", "phonenumber": "+79624123456", "address": "4"}
 
     print("Test ", phonenumbers.parse(order_details.get('phonenumber'), None))
     print(phonenumbers.is_possible_number(phonenumbers.parse(order_details.get('phonenumber'), None)))
@@ -100,8 +103,5 @@ def register_order(request):
 
     # for elem in elements:
     #     order.products.add(elem)
-
-
-    print(json.loads(request.body.decode()))
 
     return JsonResponse({})
