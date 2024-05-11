@@ -4,6 +4,7 @@ import phonenumbers
 from django.http import JsonResponse
 from django.templatetags.static import static
 from rest_framework.decorators import api_view
+from rest_framework.response import Response
 
 from .models import Product
 from .models import Order
@@ -65,43 +66,62 @@ def product_list_api(request):
 @api_view(['POST'])
 def register_order(request):
     # TODO это лишь заглушка
-    order_details = request.data
+    try:
+        order_details = request.data
 
-    print("ORDER ", order_details)
+        print("ORDER ", order_details)
 
-    # {"products": [{"product": 3, "quantity": 1}], "firstname": "1", "lastname": "2", "phonenumber": "+79624123456", "address": "4"}
+        print(order_details.get('products'))
+        # if not order_details.get('products')
 
-    print("Test ", phonenumbers.parse(order_details.get('phonenumber'), None))
-    print(phonenumbers.is_possible_number(phonenumbers.parse(order_details.get('phonenumber'), None)))
+        if not order_details.get('products'):
+            return Response({'message': 'Must have list of products',})
 
-    if not phonenumbers.is_possible_number(phonenumbers.parse(order_details.get('phonenumber'), None)):
-        raise TypeError
+        if not len(order_details.get('products')):
+            return Response({'message': 'List of products cannot be empty'})
 
-    order = Order.objects.create(
-        name=order_details.get('firstname'),
-        surname=order_details.get('lastname'),
-        # phone=order_details.get('phonenumber'),
-        phone=phonenumbers.parse(order_details.get('phonenumber'), None),
-        address=order_details.get('address'),
-    )
-    print(order)
-    # elements = []
-    for item in order_details.get('products'):
-        element = OrderElement.objects.get_or_create(
-            element=Product.objects.get(pk=item.get('product')),
-            quantity=item.get('quantity'),
-            order=order,
-        )[0]
-        element.save()
-        # print(element)
-        # elements.append(
-        #     element[0]
-        # )
-    # print(elements)
+        if not isinstance(order_details.get('products'), list):
+            return Response({'message': 'Must have list of products',})
 
-    order.save()
 
-    # for elem in elements:
-    #     order.products.add(elem)
+        # {"products": [{"product": 3, "quantity": 1}], "firstname": "1", "lastname": "2", "phonenumber": "+79624123456", "address": "4"}
+
+        print("Test ", phonenumbers.parse(order_details.get('phonenumber'), None))
+        print(phonenumbers.is_possible_number(phonenumbers.parse(order_details.get('phonenumber'), None)))
+
+        if not phonenumbers.is_possible_number(phonenumbers.parse(order_details.get('phonenumber'), None)):
+            raise TypeError
+
+        order = Order.objects.create(
+            name=order_details.get('firstname'),
+            surname=order_details.get('lastname'),
+            # phone=order_details.get('phonenumber'),
+            phone=phonenumbers.parse(order_details.get('phonenumber'), None),
+            address=order_details.get('address'),
+        )
+        print(order)
+        # elements = []
+        for item in order_details.get('products'):
+            element = OrderElement.objects.get_or_create(
+                element=Product.objects.get(pk=item.get('product')),
+                quantity=item.get('quantity'),
+                order=order,
+            )[0]
+            element.save()
+            # print(element)
+            # elements.append(
+            #     element[0]
+            # )
+        # print(elements)
+
+        order.save()
+
+        # for elem in elements:
+        #     order.products.add(elem)
+    except AttributeError:
+        print("Attribute error")
+    except TypeError:
+        print("Type error")
+
 
     return JsonResponse({})
