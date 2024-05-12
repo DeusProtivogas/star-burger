@@ -95,12 +95,12 @@ class Product(models.Model):
 
 
 class Order(models.Model):
-    name = models.CharField(
+    firstname = models.CharField(
         'имя',
         max_length=50,
         blank=False,
     )
-    surname = models.CharField(
+    lastname = models.CharField(
         'фамилия',
         max_length=50,
         blank=False,
@@ -110,7 +110,7 @@ class Order(models.Model):
         max_length=200,
         blank=False,
     )
-    phone = PhoneNumberField(
+    phonenumber = PhoneNumberField(
         'телефон',
         null=False,
         blank=False,
@@ -126,11 +126,11 @@ class Order(models.Model):
         verbose_name_plural = 'заказы'
 
     def __str__(self):
-        return f"№{self.pk}: {self.name} {self.surname}"
+        return f"№{self.pk}: {self.firstname} {self.lastname}"
 
 
 class OrderElement(models.Model):
-    element = models.ForeignKey(
+    product = models.ForeignKey(
         Product,
         verbose_name='элемент',
         related_name='elements',
