@@ -117,6 +117,7 @@ def register_order(request):
     for item in order_details.get('products'):
         product_element = OrderElement.objects.get_or_create(
             product=Product.objects.get(pk=item.get('product')),
+            price=Product.objects.get(pk=item.get('product')).price,
             quantity=item.get('quantity'),
             order=order,
         )[0]

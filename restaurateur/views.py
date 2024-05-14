@@ -4,6 +4,7 @@ from django.views import View
 from django.urls import reverse_lazy
 from django.contrib.auth.decorators import user_passes_test
 
+from django.db.models import F, Sum
 from django.contrib.auth import authenticate, login
 from django.contrib.auth import views as auth_views
 
@@ -92,10 +93,20 @@ def view_restaurants(request):
 
 @user_passes_test(is_manager, login_url='restaurateur:login')
 def view_orders(request):
+    # {'products': [OrderedDict([('product', 1), ('quantity', 1)])], 'firstname': 'Василий', 'lastname': 'Васильевич',
+    #  'phonenumber': '+79123456789', 'address': 'Лондон'}
 
-    orders = Order.objects.all()
+    # orders = Order.objects.select_related('products').all().annotate(
+    #     price=Product.objects.filter(pk = F('product')).first().price,
+    # )
+    orders = Order.objects.annotate(
+        total_price=Sum(F('elements__quantity') * F('elements__price'))
+    )
+    # print(orders)
+
+
 
     return render(request, template_name='order_items.html', context={
         # TODO заглушка для нереализованного функционала
-        "order_items": orders,
+        "order_items": orders.iterator(),
     })

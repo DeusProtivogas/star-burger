@@ -115,11 +115,6 @@ class Order(models.Model):
         null=False,
         blank=False,
     )
-    # products = models.ManyToManyField(
-    #     OrderElement,
-    #     verbose_name='элемены заказа',
-    #     related_name='orders',
-    # )
 
     class Meta:
         verbose_name = 'заказ'
@@ -139,6 +134,18 @@ class OrderElement(models.Model):
     )
     quantity = models.IntegerField(
         'количество',
+        null=False,
+        blank=False,
+        validators=[MinValueValidator(1)],
+    )
+    price = models.DecimalField(
+        'стоимость',
+        max_digits=8,
+        decimal_places=2,
+        null=False,
+        blank=False,
+        default=1,
+        validators=[MinValueValidator(0)],
     )
     order = models.ForeignKey(
         Order,
