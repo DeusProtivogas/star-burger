@@ -97,34 +97,6 @@ def register_order(request):
 
     print(serializer.data)
 
-    # if not order_details.get('products'):
-    #     return Response({'message': 'Must have list of products',}, status=HTTP_400_BAD_REQUEST)
-    #
-    # if not len(order_details.get('products')):
-    #     return Response({'message': 'List of products cannot be empty'}, status=HTTP_400_BAD_REQUEST)
-    #
-    # if not isinstance(order_details.get('products'), list):
-    #     return Response({'message': 'Must have list of products',}, status=HTTP_400_BAD_REQUEST)
-    #
-    #
-    # if not order_details.get('firstname'):
-    #     return Response({'message': 'First name cannot be empty',}, status=HTTP_400_BAD_REQUEST)
-    # if not isinstance(order_details.get('firstname'), str):
-    #     return Response({'message': 'First name must be string',}, status=HTTP_400_BAD_REQUEST)
-    #
-    # if not order_details.get('lastname'):
-    #     return Response({'message': 'Last name cannot be empty',}, status=HTTP_400_BAD_REQUEST)
-    # if not isinstance(order_details.get('lastname'), str):
-    #     return Response({'message': 'Last name must be string',}, status=HTTP_400_BAD_REQUEST)
-    #
-    # if not order_details.get('phonenumber'):
-    #     return Response({'message': 'Phone number cannot be empty',}, status=HTTP_400_BAD_REQUEST)
-    #
-    # if not order_details.get('address'):
-    #     return Response({'message': 'Address cannot be empty',}, status=HTTP_400_BAD_REQUEST)
-    # if not isinstance(order_details.get('address'), str):
-    #     return Response({'message': 'Address must be string',}, status=HTTP_400_BAD_REQUEST)
-
     # {"products": [{"product": 3, "quantity": 1}], "firstname": "1", "lastname": "2", "phonenumber": "+79624123456", "address": "4"}
 
     # print("Test ", phonenumbers.parse(order_details.get('phonenumber'), None))
