@@ -152,7 +152,7 @@ class OrderElement(models.Model):
         verbose_name_plural = 'элементы'
 
     def __str__(self):
-        return f"{self.element.name}: {self.quantity}"
+        return f"{self.product.name}: {self.quantity}"
 
 
 class RestaurantMenuItem(models.Model):

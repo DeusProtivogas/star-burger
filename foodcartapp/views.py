@@ -89,11 +89,13 @@ def register_order(request):
 
     print("ORDER ", order_details)
 
-    print(order_details.get('products'))
+    # print(order_details.get('products'))
     # if not order_details.get('products')
 
     serializer = OrderSerializer(data=order_details)
     serializer.is_valid(raise_exception=True)
+
+    print(serializer.data)
 
     # if not order_details.get('products'):
     #     return Response({'message': 'Must have list of products',}, status=HTTP_400_BAD_REQUEST)
@@ -138,15 +140,15 @@ def register_order(request):
         phonenumber=phonenumbers.parse(order_details.get('phonenumber'), None),
         address=order_details.get('address'),
     )
-    print(order)
+    # print(order)
     # elements = []
     for item in order_details.get('products'):
-        element = OrderElement.objects.get_or_create(
-            element=Product.objects.get(pk=item.get('product')),
+        product_element = OrderElement.objects.get_or_create(
+            product=Product.objects.get(pk=item.get('product')),
             quantity=item.get('quantity'),
             order=order,
         )[0]
-        element.save()
+        product_element.save()
         # print(element)
         # elements.append(
         #     element[0]
@@ -165,4 +167,4 @@ def register_order(request):
     #     return Response({'message': 'Product does not exist',}, status=HTTP_400_BAD_REQUEST)
 
 
-    return JsonResponse({})
+    return Response(serializer.data, status=201)
