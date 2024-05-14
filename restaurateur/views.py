@@ -93,8 +93,8 @@ def view_restaurants(request):
 
 @user_passes_test(is_manager, login_url='restaurateur:login')
 def view_orders(request):
-    # {'products': [OrderedDict([('product', 1), ('quantity', 1)])], 'firstname': 'Василий', 'lastname': 'Васильевич',
-    #  'phonenumber': '+79123456789', 'address': 'Лондон'}
+    # {"products": [OrderedDict([("product", 1), ("quantity", 1)])], "firstname": "Василий", "lastname": "Васильевич",
+    #  "phonenumber": "+79123456789", "address": "Лондон"}
 
     # orders = Order.objects.select_related('products').all().annotate(
     #     price=Product.objects.filter(pk = F('product')).first().price,

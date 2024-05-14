@@ -1,6 +1,8 @@
 import json
 import phonenumbers
 
+
+from django.db import transaction
 from django.http import JsonResponse
 from django.templatetags.static import static
 from django.core.exceptions import ObjectDoesNotExist
@@ -95,40 +97,42 @@ def register_order(request):
     serializer = OrderSerializer(data=order_details)
     serializer.is_valid(raise_exception=True)
 
-    print(serializer.data)
+    with transaction.atomic():
 
-    # {"products": [{"product": 3, "quantity": 1}], "firstname": "1", "lastname": "2", "phonenumber": "+79624123456", "address": "4"}
+        print(serializer.data)
 
-    # print("Test ", phonenumbers.parse(order_details.get('phonenumber'), None))
-    # print(phonenumbers.is_valid_number(phonenumbers.parse(order_details.get('phonenumber'), None)))
+        # {"products": [{"product": 3, "quantity": 1}], "firstname": "1", "lastname": "2", "phonenumber": "+79624123456", "address": "4"}
 
-    # if not phonenumbers.is_valid_number(phonenumbers.parse(order_details.get('phonenumber'), None)):
-    #     return Response({'message': 'Incorrect phone number',}, status=HTTP_400_BAD_REQUEST)
+        # print("Test ", phonenumbers.parse(order_details.get('phonenumber'), None))
+        # print(phonenumbers.is_valid_number(phonenumbers.parse(order_details.get('phonenumber'), None)))
 
-    order = Order.objects.create(
-        firstname=order_details.get('firstname'),
-        lastname=order_details.get('lastname'),
-        # phone=order_details.get('phonenumber'),
-        phonenumber=phonenumbers.parse(order_details.get('phonenumber'), None),
-        address=order_details.get('address'),
-    )
-    # print(order)
-    # elements = []
-    for item in order_details.get('products'):
-        product_element = OrderElement.objects.get_or_create(
-            product=Product.objects.get(pk=item.get('product')),
-            price=Product.objects.get(pk=item.get('product')).price,
-            quantity=item.get('quantity'),
-            order=order,
-        )[0]
-        product_element.save()
-        # print(element)
-        # elements.append(
-        #     element[0]
-        # )
-    # print(elements)
+        # if not phonenumbers.is_valid_number(phonenumbers.parse(order_details.get('phonenumber'), None)):
+        #     return Response({'message': 'Incorrect phone number',}, status=HTTP_400_BAD_REQUEST)
 
-    order.save()
+        order = Order.objects.create(
+            firstname=order_details.get('firstname'),
+            lastname=order_details.get('lastname'),
+            # phone=order_details.get('phonenumber'),
+            phonenumber=phonenumbers.parse(order_details.get('phonenumber'), None),
+            address=order_details.get('address'),
+        )
+        # print(order)
+        # elements = []
+        for item in order_details.get('products'):
+            product_element = OrderElement.objects.get_or_create(
+                product=Product.objects.get(pk=item.get('product')),
+                price=Product.objects.get(pk=item.get('product')).price,
+                quantity=item.get('quantity'),
+                order=order,
+            )[0]
+            product_element.save()
+            # print(element)
+            # elements.append(
+            #     element[0]
+            # )
+        # print(elements)
+
+        order.save()
 
     # for elem in elements:
     #     order.products.add(elem)
