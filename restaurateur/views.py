@@ -4,7 +4,7 @@ from django.views import View
 from django.urls import reverse_lazy
 from django.contrib.auth.decorators import user_passes_test
 
-from django.db.models import F, Sum
+from django.db.models import F, Sum, Q
 from django.contrib.auth import authenticate, login
 from django.contrib.auth import views as auth_views
 
@@ -101,7 +101,7 @@ def view_orders(request):
     # )
     orders = Order.objects.annotate(
         total_price=Sum(F('elements__quantity') * F('elements__price'))
-    )
+    ).exclude(status=Order.DONE)
     # print(orders)
 
 

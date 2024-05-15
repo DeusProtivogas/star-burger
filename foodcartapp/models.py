@@ -95,6 +95,24 @@ class Product(models.Model):
 
 
 class Order(models.Model):
+    RECEIVED = 'received'
+    ACCEPTED = 'accepted'
+    INPROGRESS = 'in_progress'
+    DELIVERY = 'being_delivered'
+    DONE = 'delivered'
+    ORDER_STATUSES = [
+        (RECEIVED, 'Начат'),
+        (ACCEPTED, 'Принят'),
+        (INPROGRESS, 'Собирается'),
+        (DELIVERY, 'В доставке'),
+        (DONE, 'Выполнен'),
+    ]
+    status = models.CharField(
+        max_length=20,
+        choices=ORDER_STATUSES,
+        default=RECEIVED,
+        db_index=True,
+    )
     firstname = models.CharField(
         'имя',
         max_length=50,
