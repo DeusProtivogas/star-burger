@@ -1,5 +1,8 @@
+from datetime import datetime
+
 from django.db import models
 from django.core.validators import MinValueValidator
+from django.db.models.functions import Now
 from phonenumber_field.modelfields import PhoneNumberField
 
 class Restaurant(models.Model):
@@ -133,7 +136,25 @@ class Order(models.Model):
         null=False,
         blank=False,
     )
-
+    comment = models.TextField(
+        'комментарий',
+        blank=True,
+    )
+    received = models.DateTimeField(
+        'поступил в',
+        default=datetime.now,
+        blank=True,
+    )
+    confirmed = models.DateTimeField(
+        'уточнен в',
+        blank=True,
+        null=True,
+    )
+    delivered = models.DateTimeField(
+        'доставлен в',
+        blank=True,
+        null=True,
+    )
     class Meta:
         verbose_name = 'заказ'
         verbose_name_plural = 'заказы'
