@@ -110,10 +110,23 @@ class Order(models.Model):
         (DELIVERY, 'В доставке'),
         (DONE, 'Выполнен'),
     ]
+    CASH = 'cash'
+    CARD = 'card'
+    PAYMENT_METHODS = [
+        (CASH, 'Наличными'),
+        (CARD, 'Электронно'),
+    ]
+
     status = models.CharField(
         max_length=20,
         choices=ORDER_STATUSES,
         default=RECEIVED,
+        db_index=True,
+    )
+    payment = models.CharField(
+        max_length=20,
+        choices=PAYMENT_METHODS,
+        default=CASH,
         db_index=True,
     )
     firstname = models.CharField(
@@ -155,6 +168,7 @@ class Order(models.Model):
         blank=True,
         null=True,
     )
+
     class Meta:
         verbose_name = 'заказ'
         verbose_name_plural = 'заказы'
