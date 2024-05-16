@@ -1,7 +1,7 @@
 import json
 import phonenumbers
 
-
+from geopy import distance
 from django.db import transaction
 from django.http import JsonResponse
 from django.templatetags.static import static
@@ -12,9 +12,10 @@ from rest_framework.status import HTTP_400_BAD_REQUEST
 from rest_framework.serializers import Serializer, ModelSerializer
 from rest_framework.serializers import CharField
 
-from .models import Product
+from .models import Product, Restaurant, RestaurantMenuItem
 from .models import Order
 from .models import OrderElement
+from .utility import fetch_coordinates
 
 
 def banners_list_api(request):
@@ -85,39 +86,26 @@ class OrderSerializer(ModelSerializer):
 
 @api_view(['POST'])
 def register_order(request):
-    # TODO это лишь заглушка
+    my_coords = fetch_coordinates("Красная площадь")
 
     order_details = request.data
 
-    print("ORDER ", order_details)
-
-    # print(order_details.get('products'))
-    # if not order_details.get('products')
 
     serializer = OrderSerializer(data=order_details)
     serializer.is_valid(raise_exception=True)
 
     with transaction.atomic():
 
-        print(serializer.data)
-
-        # {"products": [{"product": 3, "quantity": 1}], "firstname": "1", "lastname": "2", "phonenumber": "+79624123456", "address": "4"}
-
-        # print("Test ", phonenumbers.parse(order_details.get('phonenumber'), None))
-        # print(phonenumbers.is_valid_number(phonenumbers.parse(order_details.get('phonenumber'), None)))
-
-        # if not phonenumbers.is_valid_number(phonenumbers.parse(order_details.get('phonenumber'), None)):
-        #     return Response({'message': 'Incorrect phone number',}, status=HTTP_400_BAD_REQUEST)
 
         order = Order.objects.create(
             firstname=order_details.get('firstname'),
             lastname=order_details.get('lastname'),
-            # phone=order_details.get('phonenumber'),
             phonenumber=phonenumbers.parse(order_details.get('phonenumber'), None),
             address=order_details.get('address'),
         )
-        # print(order)
-        # elements = []
+        restaurants = Restaurant.objects.all()
+        order_restaurants = set(restaurants)
+
         for item in order_details.get('products'):
             product_element = OrderElement.objects.get_or_create(
                 product=Product.objects.get(pk=item.get('product')),
@@ -126,22 +114,25 @@ def register_order(request):
                 order=order,
             )[0]
             product_element.save()
-            # print(element)
-            # elements.append(
-            #     element[0]
-            # )
-        # print(elements)
+
+            element_restaurants = []
+            for item in product_element.product.menu_items.all():
+                restaurant = restaurants.filter(pk=item.restaurant_id)[0]
+                element_restaurants.append(restaurant)
+
+            order_restaurants = order_restaurants.intersection(set(element_restaurants))
+
+
+        if not order_restaurants:
+            order.restaurants_choice = "Нет ресторанов"
+        else:
+            order.restaurants_choice = f"Доступные рестораны:\n" + '\n'.join(
+                [
+                    f'{x.name} - {round(distance.distance(my_coords, (x.coordinates.first().latitude, x.coordinates.first().longitude)).km, 2)}'
+                    for x in order_restaurants
+                ]
+            )
 
         order.save()
-
-    # for elem in elements:
-    #     order.products.add(elem)
-    # except AttributeError:
-    #     print("Attribute error")
-    # except TypeError:
-    #     print("Type error")
-    # except ObjectDoesNotExist:
-    #     return Response({'message': 'Product does not exist',}, status=HTTP_400_BAD_REQUEST)
-
 
     return Response(serializer.data, status=201)

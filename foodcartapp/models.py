@@ -168,6 +168,18 @@ class Order(models.Model):
         blank=True,
         null=True,
     )
+    restaurant_chosen = models.ForeignKey(
+        Restaurant,
+        verbose_name='Где готовить',
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE,
+    )
+    restaurants_choice = models.TextField(
+        verbose_name='Варианты ресторанов',
+        max_length=200,
+        blank=True,
+    )
 
     class Meta:
         verbose_name = 'заказ'
@@ -243,3 +255,37 @@ class RestaurantMenuItem(models.Model):
 
     def __str__(self):
         return f"{self.restaurant.name} - {self.product.name}"
+
+
+class Coordinates(models.Model):
+    address = models.TextField(
+        'адрес текстом',
+    )
+    longitude = models.DecimalField(
+        'долгота',
+        max_digits=14,
+        decimal_places=10,
+    )
+    latitude = models.DecimalField(
+        'широта',
+        max_digits=14,
+        decimal_places=10,
+    )
+    last_updated = models.DateTimeField(
+        'обновлялись в',
+        blank=True,
+        null=True,
+    )
+    restaurant = models.ForeignKey(
+        Restaurant,
+        on_delete=models.CASCADE,
+        related_name='coordinates',
+        verbose_name='ресторан',
+    )
+
+    class Meta:
+        verbose_name = 'адрес'
+        verbose_name_plural = 'адреса'
+
+    def __str__(self):
+        return f"{self.restaurant}: {self.longitude} {self.latitude}"
