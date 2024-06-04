@@ -16,6 +16,7 @@ from .models import Product, Restaurant, RestaurantMenuItem
 from .models import Order
 from .models import OrderElement
 from .utility import fetch_coordinates
+from .serializers import OrderSerializer
 
 
 def banners_list_api(request):
@@ -68,20 +69,6 @@ def product_list_api(request):
         'ensure_ascii': False,
         'indent': 4,
     })
-
-
-class ElementsSerializer(ModelSerializer):
-    class Meta:
-        model = OrderElement
-        fields = ['product', 'quantity']
-
-
-class OrderSerializer(ModelSerializer):
-    products = ElementsSerializer(many=True, allow_empty=False)
-
-    class Meta:
-        model = Order
-        fields = ['products', 'firstname', 'lastname', 'phonenumber', 'address']
 
 
 @api_view(['POST'])
