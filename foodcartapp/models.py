@@ -209,7 +209,6 @@ class OrderElement(models.Model):
         decimal_places=2,
         null=False,
         blank=False,
-        default=1,
         validators=[MinValueValidator(0)],
     )
     order = models.ForeignKey(
