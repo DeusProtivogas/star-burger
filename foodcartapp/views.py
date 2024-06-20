@@ -16,7 +16,7 @@ from .models import Product, Restaurant, RestaurantMenuItem
 from .models import Order
 from .models import OrderElement
 from .utility import fetch_coordinates
-from .serializers import OrderSerializer
+from .serializers import OrderSerializer, ElementsSerializer
 
 
 def banners_list_api(request):
@@ -73,53 +73,121 @@ def product_list_api(request):
 
 @api_view(['POST'])
 def register_order(request):
-    my_coords = fetch_coordinates("Красная площадь")
-
     order_details = request.data
 
-
-    serializer = OrderSerializer(data=order_details)
-    serializer.is_valid(raise_exception=True)
+    print('TEST123')
 
     with transaction.atomic():
+        print('order dets ', order_details)
+        serializer = OrderSerializer(data=order_details)
+        # print(serializer)
+        # # serializer.is_valid(raise_exception=True)
+        serializer.is_valid()
+        print(serializer.errors)
+        order = serializer.save()
+        print(order)
 
-
-        order = Order.objects.create(
-            firstname=order_details.get('firstname'),
-            lastname=order_details.get('lastname'),
-            phonenumber=phonenumbers.parse(order_details.get('phonenumber'), None),
-            address=order_details.get('address'),
-        )
         restaurants = Restaurant.objects.all()
         order_restaurants = set(restaurants)
 
-        for item in order_details.get('products'):
-            product_element = OrderElement.objects.get_or_create(
-                product=Product.objects.get(pk=item.get('product')),
-                price=Product.objects.get(pk=item.get('product')).price,
-                quantity=item.get('quantity'),
-                order=order,
-            )[0]
-            product_element.save()
+        for order_element in order_details['products']:
+            order_element['order'] = order
+            print(order_element)
+            element_data = {
+                'order': order.pk,
+                # 'product': Product.objects.get( pk=order_element['product'] ),
+                'product': order_element['product'],
+                'quantity': order_element['quantity'],
+            }
+            print(element_data)
 
+            product_element_serializer = ElementsSerializer(data=element_data)
+            # print(product_element_serializer)
+            # # serializer.is_valid(raise_exception=True)
+            product_element_serializer.is_valid()
+            print(product_element_serializer.errors)
+            order_element = product_element_serializer.save()
             element_restaurants = []
-            for item in product_element.product.menu_items.all():
+            for item in order_element.product.menu_items.all():
                 restaurant = restaurants.filter(pk=item.restaurant_id)[0]
                 element_restaurants.append(restaurant)
 
             order_restaurants = order_restaurants.intersection(set(element_restaurants))
 
-
-        if not order_restaurants:
-            order.restaurants_choice = "Нет ресторанов"
-        else:
+        if order_restaurants:
             order.restaurants_choice = f"Доступные рестораны:\n" + '\n'.join(
                 [
-                    f'{x.name} - {round(distance.distance(my_coords, (x.coordinates.first().latitude, x.coordinates.first().longitude)).km, 2)}'
+                    f'{x.name} - {round(distance.distance(fetch_coordinates(), (x.coordinates.first().latitude, x.coordinates.first().longitude)).km, 2)}'
                     for x in order_restaurants
                 ]
             )
+            order.save()
 
-        order.save()
+        # for product in product_list:
+        #     print('b')
+        #     product_data = {
+        #         'order': order,
+        #         'product': product.get('product'),
+        #         'quantity': product.get('quantity'),
+        #     }
+        #     product_element = ElementsSerializer(data=product_data)
+        #     print(product_element)
+        #
+        #
+        #
+
+
+        #
+        # if not order_restaurants:
+        #     order.restaurants_choice = "Нет ресторанов"
+        # else:
+        #     order.restaurants_choice = f"Доступные рестораны:\n" + '\n'.join(
+        #         [
+        #             f'{x.name} - {round(distance.distance(fetch_coordinates(), (x.coordinates.first().latitude, x.coordinates.first().longitude)).km, 2)}'
+        #             for x in order_restaurants
+        #         ]
+        #     )
+
+    # with transaction.atomic():
+    #
+    #
+    #     order = Order.objects.create(
+    #         firstname=order_details.get('firstname'),
+    #         lastname=order_details.get('lastname'),
+    #         phonenumber=phonenumbers.parse(order_details.get('phonenumber'), None),
+    #         address=order_details.get('address'),
+    #     )
+    #     restaurants = Restaurant.objects.all()
+    #     order_restaurants = set(restaurants)
+    #
+    #     for item in order_details.get('products'):
+    #         product_element = OrderElement.objects.get_or_create(
+    #             product=Product.objects.get(pk=item.get('product')),
+    #             price=Product.objects.get(pk=item.get('product')).price,
+    #             quantity=item.get('quantity'),
+    #             order=order,
+    #         )[0]
+    #         product_element.save()
+    #
+    #         element_restaurants = []
+    #         for item in product_element.product.menu_items.all():
+    #             restaurant = restaurants.filter(pk=item.restaurant_id)[0]
+    #             element_restaurants.append(restaurant)
+    #
+    #         order_restaurants = order_restaurants.intersection(set(element_restaurants))
+    #
+    #
+    #     if not order_restaurants:
+    #         order.restaurants_choice = "Нет ресторанов"
+    #     else:
+    #         order.restaurants_choice = f"Доступные рестораны:\n" + '\n'.join(
+    #             [
+    #                 f'{x.name} - {round(distance.distance(fetch_coordinates(), (x.coordinates.first().latitude, x.coordinates.first().longitude)).km, 2)}'
+    #                 for x in order_restaurants
+    #             ]
+    #         )
+    #
+    #     order.save()
 
     return Response(serializer.data, status=201)
+    # return Response("good", status=201)
