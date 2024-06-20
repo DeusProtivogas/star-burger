@@ -147,7 +147,6 @@ class Order(models.Model):
     phonenumber = PhoneNumberField(
         'телефон',
         null=False,
-        blank=False,
     )
     comment = models.TextField(
         'комментарий',
