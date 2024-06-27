@@ -13,7 +13,7 @@ def fetch_coordinates(address="Красная площадь", apikey=settings.Y
     found_places = response.json()['response']['GeoObjectCollection']['featureMember']
 
     if not found_places:
-        return None
+        return 1, 1
 
     most_relevant = found_places[0]
     lon, lat = most_relevant['GeoObject']['Point']['pos'].split(" ")
