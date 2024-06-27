@@ -97,6 +97,43 @@ class Product(models.Model):
 
 
 
+class OrderElement(models.Model):
+    product = models.ForeignKey(
+        Product,
+        verbose_name='элемент',
+        related_name='elements',
+        null=False,
+        on_delete=models.CASCADE,
+    )
+    quantity = models.IntegerField(
+        'количество',
+        null=False,
+        blank=False,
+        validators=[MinValueValidator(1)],
+    )
+    price = models.DecimalField(
+        'стоимость',
+        max_digits=8,
+        decimal_places=2,
+        null=False,
+        blank=False,
+        validators=[MinValueValidator(0)],
+    )
+    # order = models.ForeignKey(
+    #     Order,
+    #     verbose_name='заказ',
+    #     related_name='elements',
+    #     on_delete=models.CASCADE,
+    # )
+
+    class Meta:
+        verbose_name = 'элемент'
+        verbose_name_plural = 'элементы'
+
+    def __str__(self):
+        return f"{self.product.name}: {self.quantity}"
+
+
 class Order(models.Model):
     RECEIVED = 'received'
     ACCEPTED = 'accepted'
@@ -179,6 +216,11 @@ class Order(models.Model):
         max_length=200,
         blank=True,
     )
+    elements = models.ManyToManyField(
+        OrderElement,
+        verbose_name='Элементы',
+        related_name='order',
+    )
 
     class Meta:
         verbose_name = 'заказ'
@@ -187,42 +229,6 @@ class Order(models.Model):
     def __str__(self):
         return f"№{self.pk}: {self.firstname} {self.lastname}"
 
-
-class OrderElement(models.Model):
-    product = models.ForeignKey(
-        Product,
-        verbose_name='элемент',
-        related_name='elements',
-        null=False,
-        on_delete=models.CASCADE,
-    )
-    quantity = models.IntegerField(
-        'количество',
-        null=False,
-        blank=False,
-        validators=[MinValueValidator(1)],
-    )
-    price = models.DecimalField(
-        'стоимость',
-        max_digits=8,
-        decimal_places=2,
-        null=False,
-        blank=False,
-        validators=[MinValueValidator(0)],
-    )
-    order = models.ForeignKey(
-        Order,
-        verbose_name='заказ',
-        related_name='elements',
-        on_delete=models.CASCADE,
-    )
-
-    class Meta:
-        verbose_name = 'элемент'
-        verbose_name_plural = 'элементы'
-
-    def __str__(self):
-        return f"{self.product.name}: {self.quantity}"
 
 
 class RestaurantMenuItem(models.Model):
