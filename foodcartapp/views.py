@@ -79,6 +79,17 @@ def register_order(request):
 
     with transaction.atomic():
         print('order dets ', order_details)
+        # for elem in order_details['products']:
+        #     ord_elem = ElementsSerializer
+        order_elements = []
+        for e in order_details['products']:
+            # e['price'] = Product.objects.get(pk=e.get('product')).price
+            elems_ser = ElementsSerializer(data=e)
+            elems_ser.is_valid()
+            print(elems_ser.errors)
+            order_elements.append( elems_ser.save().id )
+
+        order_details['elements'] = order_elements
         serializer = OrderSerializer(data=order_details)
         # print(serializer)
         # # serializer.is_valid(raise_exception=True)
@@ -90,38 +101,38 @@ def register_order(request):
         restaurants = Restaurant.objects.all()
         order_restaurants = set(restaurants)
 
-        for order_element in order_details['products']:
-            order_element['order'] = order
-            print(order_element)
-            element_data = {
-                'order': order.pk,
-                # 'product': Product.objects.get( pk=order_element['product'] ),
-                'product': order_element['product'],
-                'quantity': order_element['quantity'],
-            }
-            print(element_data)
+        # for order_element in order_details['products']:
+        #     order_element['order'] = order
+        #     print(order_element)
+        #     element_data = {
+        #         'order': order.pk,
+        #         # 'product': Product.objects.get( pk=order_element['product'] ),
+        #         'product': order_element['product'],
+        #         'quantity': order_element['quantity'],
+        #     }
+        #     print(element_data)
+        #
+        #     product_element_serializer = ElementsSerializer(data=element_data)
+        #     # print(product_element_serializer)
+        #     # # serializer.is_valid(raise_exception=True)
+        #     product_element_serializer.is_valid()
+        #     print(product_element_serializer.errors)
+        #     order_element = product_element_serializer.save()
+        #     element_restaurants = []
+        #     for item in order_element.product.menu_items.all():
+        #         restaurant = restaurants.filter(pk=item.restaurant_id)[0]
+        #         element_restaurants.append(restaurant)
+        #
+        #     order_restaurants = order_restaurants.intersection(set(element_restaurants))
 
-            product_element_serializer = ElementsSerializer(data=element_data)
-            # print(product_element_serializer)
-            # # serializer.is_valid(raise_exception=True)
-            product_element_serializer.is_valid()
-            print(product_element_serializer.errors)
-            order_element = product_element_serializer.save()
-            element_restaurants = []
-            for item in order_element.product.menu_items.all():
-                restaurant = restaurants.filter(pk=item.restaurant_id)[0]
-                element_restaurants.append(restaurant)
-
-            order_restaurants = order_restaurants.intersection(set(element_restaurants))
-
-        if order_restaurants:
-            order.restaurants_choice = f"Доступные рестораны:\n" + '\n'.join(
-                [
-                    f'{x.name} - {round(distance.distance(fetch_coordinates(), (x.coordinates.first().latitude, x.coordinates.first().longitude)).km, 2)}'
-                    for x in order_restaurants
-                ]
-            )
-            order.save()
+        # if order_restaurants:
+        #     order.restaurants_choice = f"Доступные рестораны:\n" + '\n'.join(
+        #         [
+        #             f'{x.name} - {round(distance.distance(fetch_coordinates(), (x.coordinates.first().latitude, x.coordinates.first().longitude)).km, 2)}'
+        #             for x in order_restaurants
+        #         ]
+        #     )
+        #     order.save()
 
         # for product in product_list:
         #     print('b')
