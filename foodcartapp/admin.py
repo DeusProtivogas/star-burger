@@ -116,27 +116,26 @@ class ProductAdmin(admin.ModelAdmin):
 class OrderElementAdmin(admin.ModelAdmin):
     pass
 
+class OrderElementsInline(admin.TabularInline):
+    model = Order.elements.through
 
-# class OrderElementInline(admin.TabularInline):
-#     model = OrderElement.orders
-class OrderElementInline(admin.TabularInline):
-    model = OrderElement
 
 
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
 
     def response_change(self, request, obj):
-        # print("TEST ", url_has_allowed_host_and_scheme(request.GET.get('next'), None))
         res = super(OrderAdmin, self).response_post_save_change(request, obj)
-        # if "next" in request.GET:
         if url_has_allowed_host_and_scheme(request.GET.get('next'), None):
             return HttpResponseRedirect(request.GET['next'])
         else:
             return res
+    exclude = [
+        'elements',
+    ]
 
     inlines = [
-        OrderElementInline,
+        OrderElementsInline,
     ]
 
 
