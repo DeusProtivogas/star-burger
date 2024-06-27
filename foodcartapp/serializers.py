@@ -11,10 +11,11 @@ from .models import OrderElement
 from .utility import fetch_coordinates
 
 
+
 class ElementsSerializer(ModelSerializer):
 
     def create(self, data):
-        # print('elem data in ser ', data)
+        print('elem data in ser ', data)
         # print(Product.objects.get(pk=data.get('product')).price)
 
         with transaction.atomic():
@@ -23,16 +24,16 @@ class ElementsSerializer(ModelSerializer):
                 price=data.get('product').price,
                 # price=data.get('product').price,
                 quantity=data.get('quantity'),
-                order=data.get('order'),
+                # order=data.get('order'),
             )
 
-
-            product_element.save()
+            print('test elem ', product_element)
+            # product_element.save()
         return product_element
 
     class Meta:
         model = OrderElement
-        fields = ['product', 'quantity', 'price', 'order']
+        fields = ['product', 'quantity',]
 
 
 class OrderSerializer(ModelSerializer):
@@ -40,8 +41,8 @@ class OrderSerializer(ModelSerializer):
 
     def create(self, order_details):
         print('dets ', order_details)
-        product_list = order_details.get('products')
-        print(product_list)
+        element_list = order_details.get('elements')
+        print(element_list)
 
         with transaction.atomic():
             order = Order.objects.create(
@@ -51,7 +52,34 @@ class OrderSerializer(ModelSerializer):
                 address=order_details.get('address'),
                 restaurants_choice="Нет ресторанов",
             )
+            order.elements.add( *element_list )
+
+            restaurants = Restaurant.objects.all()
+            order_restaurants = set(restaurants)
+            element_restaurants = []
+            for item in order.elements.all():
+                print(item)
+                print(item.product.menu_items.all())
+                for possible_restaurant in item.product.menu_items.all():
+                    print(possible_restaurant.restaurant.id)
+                    restaurant = restaurants.filter(pk=possible_restaurant.restaurant.id)[0]
+                    print(restaurant)
+                    element_restaurants.append(restaurant)
+                    print('asd', element_restaurants)
+
+            order_restaurants = order_restaurants.intersection(set(element_restaurants))
+            print('chosen ', order_restaurants)
+
+            if order_restaurants:
+                order.restaurants_choice = f"Доступные рестораны:\n" + '\n'.join(
+                    [
+                        f'{x.name} - {round(distance.distance(fetch_coordinates(), (x.coordinates.first().latitude, x.coordinates.first().longitude)).km, 2)}'
+                        for x in order_restaurants
+                    ]
+                )
+
             print("AAAA")
+            # return None
 
             # for product in product_list:
             #     print('b')
@@ -84,4 +112,4 @@ class OrderSerializer(ModelSerializer):
 
     class Meta:
         model = Order
-        fields = ['firstname', 'lastname', 'phonenumber', 'address']
+        fields = ['firstname', 'lastname', 'phonenumber', 'address', 'elements']
