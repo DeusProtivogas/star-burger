@@ -96,35 +96,23 @@ class Product(models.Model):
         return self.name
 
 
-
 class OrderElement(models.Model):
     product = models.ForeignKey(
         Product,
         verbose_name='элемент',
         related_name='elements',
-        null=False,
         on_delete=models.CASCADE,
     )
     quantity = models.IntegerField(
         'количество',
-        null=False,
-        blank=False,
         validators=[MinValueValidator(1)],
     )
     price = models.DecimalField(
         'стоимость',
         max_digits=8,
         decimal_places=2,
-        null=False,
-        blank=False,
         validators=[MinValueValidator(0)],
     )
-    # order = models.ForeignKey(
-    #     Order,
-    #     verbose_name='заказ',
-    #     related_name='elements',
-    #     on_delete=models.CASCADE,
-    # )
 
     class Meta:
         verbose_name = 'элемент'
@@ -169,21 +157,17 @@ class Order(models.Model):
     firstname = models.CharField(
         'имя',
         max_length=50,
-        blank=False,
     )
     lastname = models.CharField(
         'фамилия',
         max_length=50,
-        blank=False,
     )
     address = models.TextField(
         'адрес',
         max_length=200,
-        blank=False,
     )
     phonenumber = PhoneNumberField(
         'телефон',
-        null=False,
     )
     comment = models.TextField(
         'комментарий',
