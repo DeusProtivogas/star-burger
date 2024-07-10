@@ -32,6 +32,14 @@ INSTALLED_APPS = [
     'rest_framework',
 ]
 
+ROLLBAR = {
+    'access_token': env('ROLLBACK_TOKEN'),
+    'environment': env('ROLLBACK_ENV', 'production'),
+    'code_version': '1.0',
+    'root': BASE_DIR,
+}
+
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -41,6 +49,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'debug_toolbar.middleware.DebugToolbarMiddleware',
+    'rollbar.contrib.django.middleware.RollbarNotifierMiddlewareExcluding404',
 ]
 
 ROOT_URLCONF = 'star_burger.urls'
