@@ -92,12 +92,6 @@ WSGI_APPLICATION = 'star_burger.wsgi.application'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
 
-# DATABASES = {
-#     'default': dj_database_url.config(
-#         default='sqlite:////{0}'.format(os.path.join(BASE_DIR, 'db.sqlite3'))
-#     )
-# }
-
 DATABASES = {
     'default': dj_database_url.parse(
         os.getenv('POSTRESQL_URL'),
@@ -105,18 +99,6 @@ DATABASES = {
         conn_health_checks=True,
     )
 }
-
-
-# DATABASES = {
-#     'default': dj_database_url.config(
-#         'dbname': 'star-burger-db',  # Replace with your database name
-#         'user': 'staruser',
-#         'password': 'pwd',
-#         'host': 'localhost',  # Replace with your host
-#         'port': '5432'  # Replace with your port
-#     )
-# }
-
 
 AUTH_PASSWORD_VALIDATORS = [
     {
