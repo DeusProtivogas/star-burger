@@ -33,7 +33,7 @@ INSTALLED_APPS = [
 ]
 
 ROLLBAR = {
-    'access_token': env('ROLLBACK_TOKEN'),
+    'access_token': env('ROLLBACK_TOKEN', None),
     'environment': env('ROLLBACK_ENV', 'production'),
     'code_version': '1.0',
     'root': BASE_DIR,
