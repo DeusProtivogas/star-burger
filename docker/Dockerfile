@@ -22,8 +22,8 @@ RUN pip install --no-cache-dir --upgrade pip && pip install --no-cache-dir -r re
 
 RUN apt-get update && apt-get install -y curl \
     && curl -fsSL https://deb.nodesource.com/setup_16.x | bash - \
-    && apt-get install -y nodejs \
-    && npm install -g npm@latest
+    && apt-get install -y nodejs=16.16.0-1nodesource1 \
+    && apt-mark hold nodejs
 
 # Копируем весь проект в контейнер
 COPY . /app/
