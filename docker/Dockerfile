@@ -20,12 +20,25 @@ COPY requirements.txt /app/
 # Устанавливаем зависимости Python
 RUN pip install --no-cache-dir --upgrade pip && pip install --no-cache-dir -r requirements.txt
 
+RUN apt-get update && apt-get install -y curl \
+    && curl -fsSL https://deb.nodesource.com/setup_16.x | bash - \
+    && apt-get install -y nodejs \
+    && npm install -g npm@latest
+
 # Копируем весь проект в контейнер
 COPY . /app/
 
 # Копируем entrypoint.sh и делаем его исполняемым
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
+
+# Установите зависимости проекта
+COPY package.json package-lock.json /app/
+RUN npm install
+
+# Соберите фронтенд
+COPY bundles-src /app/bundles-src
+RUN npm run build
 
 
 # Собираем статические файлы
