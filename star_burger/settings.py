@@ -9,7 +9,7 @@ env = Env()
 env.read_env()
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+# STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 
 SECRET_KEY = env('SECRET_KEY')
@@ -92,13 +92,25 @@ WSGI_APPLICATION = 'star_burger.wsgi.application'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
 
+# DATABASES = {
+#     'default': dj_database_url.parse(
+#         os.getenv('POSTRESQL_URL'),
+#         conn_max_age=600,
+#         conn_health_checks=True,
+#     )
+# }
+
 DATABASES = {
-    'default': dj_database_url.parse(
-        os.getenv('POSTRESQL_URL'),
-        conn_max_age=600,
-        conn_health_checks=True,
-    )
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'star_burger_db',
+        'USER': 'star_burger',
+        'PASSWORD': 'star_burger_password',
+        'HOST': 'db',  # Указываем имя сервиса базы данных из docker-compose.yaml
+        'PORT': 5432,
+    }
 }
+
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -126,6 +138,7 @@ USE_L10N = True
 USE_TZ = True
 
 STATIC_URL = '/static/'
+STATIC_ROOT = '/static/'
 
 INTERNAL_IPS = [
     '127.0.0.1'
