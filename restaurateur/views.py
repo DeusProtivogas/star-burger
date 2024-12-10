@@ -90,6 +90,8 @@ def view_restaurants(request):
         'restaurants': Restaurant.objects.all(),
     })
 
+def divide_by_zero():
+    return 1 / 0
 
 @user_passes_test(is_manager, login_url='restaurateur:login')
 def view_orders(request):
